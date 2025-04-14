@@ -1,0 +1,12 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+#mainCanvas {
+  margin: 20px 0 0 20px;
+  background-color: blueviolet;
+  width: 512px;
+  height: 512px;
+}
