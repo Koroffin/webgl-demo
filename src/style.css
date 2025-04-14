@@ -10,3 +10,57 @@
   width: 512px;
   height: 512px;
 }
+
+#sliders {
+  position: fixed;
+  top: 10px;
+  right: 50px;
+}
+
+.slider .title {
+  user-select: none;
+}
+
+.slider .title {
+  margin-bottom: 10px;
+}
+.slider .bar {
+  width: 500px;
+  height: 10px;
+  position: relative;
+  background-color: grey;
+}
+.slider .bar .handler {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  top: -5px;
+  border-radius: 25%;
+  border: 1px solid grey;
+  background-color: white;
+  cursor: pointer;
+  z-index: 10;
+}
+.slider .bar .handler .handler_value {
+  position: absolute;
+  color: white;
+  background-color: black;
+  top: -20px;
+  width: 40px;
+  height: 18px;
+  text-align: center;
+  left: -10px;
+  display: none;
+  user-select: none;
+}
+.slider .bar .handler:hover .handler_value,
+.slider .bar .handler .handler_value.show {
+  display: block;
+}
+.slider .bar .progress {
+  position: absolute;
+  height: 10px;
+  background-color: navy;
+  top: 0;
+  left: 0;
+}
