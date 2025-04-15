@@ -5,18 +5,26 @@ const vertexShaderSourceCode = `#version 300 es
 precision mediump float;
 
 in vec2 vertexPosition;
+in vec4 a_color;
+
+uniform vec2 offset;
+
+out vec4 color;
 
 void main () {
-  gl_Position = vec4(vertexPosition, 0.0, 1.0);
+  vec2 position = vertexPosition + offset;
+  gl_Position = vec4(position, 0.0, 1.0);
+  color = a_color;
 }`;
 
 const fragmentShaderSourceCode = `#version 300 es
 precision mediump float;
 
-out vec4 color;
+in vec4 color;
+out vec4 frag_color;
 
 void main () {
-  color = vec4(1.0, 0.0, 0.0, 1.0);
+  frag_color = color;
 }`;
 
 
@@ -37,32 +45,23 @@ const main = () => {
     throw new Error("WebGL2 is not supported");
   }
 
-  const coordsSlidersArray = [
-    new Slider("X1", 0.0),
-    new Slider("Y1", 0.5),
-    new Slider("X2", -0.5),
-    new Slider("Y2", -0.5),
-    new Slider("X3", 0.5),
-    new Slider("Y3", -0.5),
+  const vertices = [
+    0.0, 0.5,
+    -0.5, -0.5,
+    0.5, -0.5
   ];
+  const verticesBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, verticesBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
 
-  let verticesBuffer: WebGLBuffer;
-  let vertices: number[];
-  const bindBuffer = () => {
-    vertices = coordsSlidersArray.map(slider => slider.value);
-    verticesBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, verticesBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-  }
-
-  bindBuffer();
-
-  coordsSlidersArray.forEach(slider => {
-    slider.bind(() => {
-      bindBuffer();
-      draw();
-    });
-  });
+  const colors = [
+    255, 0, 0,
+    0, 255, 0,
+    0, 0, 255
+  ];
+  const colorBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Uint8Array(colors), gl.STATIC_DRAW);
 
   const vertexShader = gl.createShader(gl.VERTEX_SHADER);
 
@@ -104,6 +103,33 @@ const main = () => {
     throw new Error("vertexPosition attribute not found");
   }
 
+  const offsetLocation = gl.getUniformLocation(program, "offset");
+  if (!offsetLocation) {
+    throw new Error("offset uniform not found");
+  }
+
+  const offsetXSlider = new Slider("Offset X", 0);
+  const offsetYSlider = new Slider("Offset Y", 0);
+
+  const setOffset = () => {
+    gl.uniform2fv(offsetLocation, [ offsetXSlider.value, offsetYSlider.value ]);
+  }
+
+  offsetXSlider.bind(() => {
+    setOffset();
+    draw();
+  });
+  offsetYSlider.bind(() => {
+    setOffset();
+    draw();
+  });
+
+  const colorAttributeLocation = gl.getAttribLocation(program, "a_color");
+
+  if (colorAttributeLocation < 0) {
+    throw new Error("Color attribute not found");
+  }
+
   const viewportWidthSlider = new Slider("Viewport width", canvas.clientWidth, 100, canvas.clientWidth);
   const viewportHeightSlider = new Slider("Viewport height", canvas.clientHeight, 100, canvas.clientHeight);
 
@@ -118,6 +144,7 @@ const main = () => {
 
     gl.useProgram(program);
     gl.enableVertexAttribArray(vertexPositionAttribLocation);
+    gl.enableVertexAttribArray(colorAttributeLocation);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, verticesBuffer);
     gl.vertexAttribPointer(
@@ -125,6 +152,16 @@ const main = () => {
       2,
       gl.FLOAT,
       false,
+      0,
+      0
+    );
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+    gl.vertexAttribPointer(
+      colorAttributeLocation,
+      3,
+      gl.UNSIGNED_BYTE,
+      true,
       0,
       0
     );
