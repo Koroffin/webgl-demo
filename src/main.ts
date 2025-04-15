@@ -45,9 +45,10 @@ const main = () => {
     }
 
     const vertices = [
-        0.0, 0.5,
+        -0.5, 0.5,
         -0.5, -0.5,
-        0.5, -0.5
+        0.5, -0.5,
+        0.5, 0.5,
     ];
     const verticesBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, verticesBuffer);
@@ -57,10 +58,19 @@ const main = () => {
         255, 0, 0,
         0, 255, 0,
         0, 0, 255,
+        0, 255, 0,
     ];
     const colorsBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, colorsBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Uint8Array(colors), gl.STATIC_DRAW);
+
+    const indicies = [
+        0, 1, 2,
+        0, 2, 3
+    ];
+    const indiciesBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indiciesBuffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indicies), gl.STATIC_DRAW);
 
     const vertexShader = gl.createShader(gl.VERTEX_SHADER);
     const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
@@ -118,7 +128,7 @@ const main = () => {
 
         gl.useProgram(program);
 
-        gl.uniform2fv(offsetLocation, [ 0.5, 0.0 ]);
+        gl.uniform2fv(offsetLocation, [ 0.0, 0.0 ]);
 
         gl.enableVertexAttribArray(positionLocation);
         gl.enableVertexAttribArray(colorLocation);
@@ -143,7 +153,7 @@ const main = () => {
             0,
         );
 
-        gl.drawArrays(gl.TRIANGLES, 0, 3);
+        gl.drawElements(gl.TRIANGLES, indicies.length, gl.UNSIGNED_SHORT, 0);
     }
     draw();
 }
